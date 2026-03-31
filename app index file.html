@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gateway Morning Practice</title>
+
+  <!-- React + Babel via CDN — no install needed -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #fdf9f2; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const C = {
+      cream:      "#fdf9f2",
+      paper:      "#ede6d4",
+      inkDark:    "#1c1610",
+      inkMid:     "#3d3020",
+      inkLight:   "#6b5840",
+      dust:       "#9c8670",
+      amber:      "#c07a1a",
+      amberLight: "#e8a23a",
+      amberGlow:  "#ffd27a",
+      teal:       "#1e6b6b",
+      tealLight:  "#2d9c8a",
+      tealPale:   "#e0f4f0",
+      rose:       "#b04040",
+      fog:        "#d4c8b4",
+      white:      "#ffffff",
+    };
+
+    const focuses = [
+      { label: "Clarity & Focus",    icon: "◈", color: C.teal,       bg: C.tealPale, key: "clarity"   },
+      { label: "Healing & Balance",  icon: "✦", color: C.tealLight,  bg: "#e4f5ef",  key: "healing"   },
+      { label: "Emotional Peace",    icon: "◯", color: C.amber,      bg: "#fef4e0",  key: "emotional" },
+      { label: "Energy & Vitality",  icon: "⬡", color: C.amberLight, bg: "#fff8e8",  key: "energy"    },
+      { label: "Pattern Change",     icon: "∿", color: C.rose,       bg: "#fdecea",  key: "pattern"   },
+    ];
+
+    const durations = [
+      { label: "10 min", value: 10 },
+      { label: "20 min", value: 20 },
+      { label: "30 min", value: 30 },
+      { label: "45 min", value: 45 },
+    ];
+
+    function buildRoutine(focus, duration) {
+      const all = {
+        affirmation: {
+          id: "affirmation", title: "First Affirmation", icon: "◈", color: C.teal, minutes: 2,
+          instruction: `Close your eyes and say silently to yourself:\n\n"I am more than my physical body. Because I am more than physical matter, I can perceive that which is greater than the Physical world. I deeply desire to Expand, to Experience, to Know, to Understand, to Control, to Use such greater energies and energy systems as may be beneficial and constructive to me and to those who follow me."\n\nFeel every word as truth — the words carry no power without the feeling behind them.`,
+          tip: "Breathe naturally as you recite. Let the meaning sink in, not just the words.",
+        },
+        resonantBreathing: {
+          id: "resonantBreathing", title: "Resonant Breathing", icon: "∿", color: C.tealLight, minutes: 4,
+          instruction: `Inhale deeply, drawing energy from all parts of your body up into your head. Hold comfortably — work toward a count of 10.\n\nSwirl the energy around your brain. Then exhale slowly through your mouth as though softly blowing out a candle. As you exhale, imagine expelling stale, used-up energy through the bottoms of your feet.\n\nRepeat for 6 breaths, filling a different region each time:\n\n1 · Head fills with new, fresh energy\n2 · Upper chest & arms receive energy\n3 · Abdomen fills\n4 · Pelvic region fills\n5 · Thighs & knees fill\n6 · Lower legs & feet complete the circuit\n\nImagine filling an inverted jar with fresh, luminous energy — breath by breath.`,
+          tip: "Picture the stale energy as grey smoke leaving through your soles. New energy arrives as bright white light.",
+        },
+        securityBox: {
+          id: "securityBox", title: "Security Repository Box", icon: "⬡", color: C.dust, minutes: 2,
+          instruction: `Visualize a strong, sealed box — your Security Repository. Place inside it all worries, distractions, to-do lists, anxieties, and problems that would otherwise pull at your attention.\n\nThey are safe there. You can retrieve them later. For now, they are contained and cannot disturb your session.\n\nSeal the box. Feel the relief of release.`,
+          tip: "The box can look however feels most secure to you — a vault, a carved chest, a glowing safe.",
+        },
+        reachFocus10: {
+          id: "reachFocus10", title: "Reach Focus 10", icon: "◯", color: C.amber, minutes: 5,
+          instruction: `Lie or sit comfortably. Allow yourself to drift into deep relaxation.\n\nWhen you feel settled, say to yourself: "Two." Notice yourself drifting a little deeper.\n\nContinue slowly: "Three… Four… Five…" — each number brings deeper relaxation.\n\n"Six… Seven… Eight… Nine… Ten."\n\nAt Ten, your body is deeply relaxed while your mind remains alert and clear. This is Focus 10 — mind awake, body asleep.\n\nIf Ten doesn't feel deep enough, start again from Five or even Two. There is no rush.`,
+          tip: "Some associate numbers with body parts, relaxing each region in sequence from head to feet.",
+        },
+        ebt: {
+          id: "ebt", title: "Energy Bar Tool (EBT)", icon: "│", color: C.amberLight, minutes: 3,
+          instruction: `In Focus 10, visualize a dot of brilliant white light before you.\n\nExpand it into a bar — a glowing rod of pure white energy that fits comfortably in your hands.\n\nSay "On" — the bar lights up, charging with brilliant energy, becoming thick and bright.\n\nSay "Off" — the light dims, the bar thins.\n\nPractice slowly at first. Then faster. Give it different colors. Make it pulse and glow.\n\nFeel a subtle warmth in your solar plexus as the EBT activates. This sensation grows with practice.\n\nYour EBT is now charged and ready for use.`,
+          tip: "Some see it as a magic wand, others as a glowing tube. Whatever form feels natural to you is correct.",
+        },
+        lbm: {
+          id: "lbm", title: "Living Body Map", icon: "✦", color: C.teal, minutes: 5,
+          instruction: `In Focus 10, create a glowing silhouette of your physical body in bright white lines — a luminous paper cut-out of yourself. Place it before you.\n\nLook for any dim or flickering areas. These indicate imbalance.\n\nShift the silhouette's colors systematically:\n· Blue → examine your nervous system\n· Red → circulatory system\n· Orange → muscles & bones\n· Yellow → organs & glands\n· White → all systems together\n\nFor any dim or weak areas: aim your EBT and send bright purple, healing energy. Watch those areas grow brighter and more vibrant.\n\nFinish by charging the entire white silhouette with purple energy — feel it glow.`,
+          tip: "If the image is unclear, simply aim the EBT at areas you intuitively know need support.",
+        },
+        ebm: {
+          id: "ebm", title: "Emotional Body Map", icon: "◈", color: C.rose, minutes: 4,
+          instruction: `Behind your Living Body Map rests a finer, thinner silhouette — your Emotional Body Map. It is made of your emotional energy. Call it forward.\n\nScan it for dim, dark, or flickering spots — these are areas of emotional imbalance, stored tension, or unresolved feeling.\n\nUse your EBT: send cool, soothing green energy to dim areas to balance them. Then send bright purple to strengthen and recharge.\n\nSweep the EBT slowly from head to foot, cleansing and brightening as you go.\n\nWhen the emotional silhouette is evenly bright, calm, and serene — gently store it back behind the LBM.`,
+          tip: "Don't judge what you find. Simply observe and apply the healing energies with intention.",
+        },
+        rebal: {
+          id: "rebal", title: "Resonant Energy Balloon", icon: "◯", color: C.tealLight, minutes: 5,
+          instruction: `In Focus 10, inhale deeply — feel energy rising from feet and hands through the entire body up into the head.\n\nExhale slowly, mouth pursed as if blowing out a candle. Feel the energy swirling downward, circling around you, growing rounder.\n\nRepeat 8–10 times. Each exhale makes the energy balloon rounder and more complete.\n\nThen: inhale bringing energy in from your right. Exhale flowing it to the left. The balloon spins and expands.\n\nFill it with bright white light. Breathe it fuller and lighter until it lifts you naturally into a sense of expanded, peaceful awareness.\n\nYou float inside this protective, luminous sphere. Observe. Perceive. Rest here.\n\nWhen finished, let the REBAL reabsorb gently back into you.`,
+          tip: "This is both a protective field and a vehicle for expanded awareness. Trust where it takes you.",
+        },
+        focus12: {
+          id: "focus12", title: "Expand to Focus 12", icon: "∿", color: C.amber, minutes: 4,
+          instruction: `From the deep stillness of Focus 10, notice a new quality emerging — a charged, alive feeling. Your mind becomes more awake but in a different way. Awareness expands outward.\n\nWhen you feel this beginning, say to yourself: "Eleven."\n\nAs the feeling strengthens and deepens, say: "Twelve."\n\nAt Focus 12, your awareness extends beyond the limits of your physical location. You can perceive farther, sense more broadly, and access deeper knowing.\n\nConcentrate on your intention for today — your question, your goal, your desired insight. Then release the concentration and simply notice what arises: images, words, sensations, thought-forms.\n\nReceive without judgment.`,
+          tip: "Focus 10 is the key that unlocks Focus 12. Spend more time in 10 before attempting 12 if the transition feels forced.",
+        },
+        patternChange: {
+          id: "patternChange", title: "Desired Pattern Projection", icon: "⬡", color: C.rose, minutes: 5,
+          instruction: `From Focus 12, bring clearly to mind the pattern, habit, or position in life you wish to establish.\n\nBuild it carefully in your mind — see it fully, feel it completely, experience it as though it already exists.\n\nNow release this thought-pattern and move it strongly outward into all areas of your expanded awareness. Let it flow to the farthest reaches of that awareness.\n\nWhen you do this, the pattern begins to form and develop in your life — provided it is constructive and beneficial to the purpose of your total selves.\n\nHold the vision with feeling. Then release it completely, trusting the process.`,
+          tip: "The more specific and emotionally real the vision, the more effectively it anchors into your life.",
+        },
+        clockExercise: {
+          id: "clockExercise", title: "Clock Orientation", icon: "◈", color: C.teal, minutes: 3,
+          instruction: `In Focus 12, imagine a clock face with your consciousness at its center.\n\nSend your awareness out in the direction of each number — 12 o'clock, then 3, then 6, then 9. What do you perceive at each point?\n\nNext, swivel the clock 90 degrees so 3 is now in front of you. Again send awareness to each direction. Observe carefully.\n\nContinue rotating and perceiving. This exercise expands spatial awareness and trains your consciousness to move freely in all directions.\n\nNotice what you sense at each position without forcing or expecting anything specific.`,
+          tip: "Some find this helpful for spatial intuition and for remote viewing practice.",
+        },
+        energyBalance: {
+          id: "energyBalance", title: "Energy Balance", icon: "✦", color: C.tealLight, minutes: 3,
+          instruction: `In Focus 10, use your charged EBT to direct bright purple healing energy through your Living and Emotional Body Maps.\n\nNow take from your Security Repository one problem about which you can take action today. Hold it before you.\n\nCleanse it of all excess negative emotional energy by applying soothing, cool green energy from your EBT. Watch the emotional charge dissolve, leaving just the clear practical matter to address.\n\nReturn it — lighter now — to your awareness with calm clarity.`,
+          tip: "This separates the emotional weight from problems, letting you address them from a clear, grounded center.",
+        },
+        returnToC1: {
+          id: "returnToC1", title: "Return & Integration", icon: "◯", color: C.inkLight, minutes: 2,
+          instruction: `Gently begin the return.\n\nCount slowly in your mind from 10 to 1, each number bringing you back gradually to full waking awareness — Consciousness 1.\n\nAt 1, take three deep breaths. Sit up slowly. Stretch your arms and legs.\n\nBreathe deeply several times and feel yourself fully present in your physical body.\n\nTake a moment to write down any impressions, images, feelings, or insights from your session before they fade. Your workbook is your companion — record immediately while the experience is vivid.\n\nCarry the clarity and peace of this practice into your day.`,
+          tip: "The period just after returning is when insights are most vivid. Write immediately, without editing.",
+        },
+      };
+
+      const base = ["affirmation", "resonantBreathing", "securityBox", "reachFocus10"];
+      const focusMap = {
+        clarity:   ["ebt", "focus12", "clockExercise"],
+        healing:   ["ebt", "lbm", "ebm", "energyBalance"],
+        emotional: ["ebt", "ebm", "energyBalance"],
+        energy:    ["ebt", "rebal", "lbm"],
+        pattern:   ["ebt", "focus12", "patternChange"],
+      };
+
+      const selected = [...base, ...(focusMap[focus] || focusMap.healing), "returnToC1"];
+      const steps = selected.map(k => all[k]).filter(Boolean);
+
+      let total = steps.reduce((s, st) => s + st.minutes, 0);
+      while (total > duration && steps.length > 5) {
+        const removable = steps.slice(4, steps.length - 1);
+        if (!removable.length) break;
+        const idx = steps.indexOf(removable[removable.length - 1]);
+        total -= steps[idx].minutes;
+        steps.splice(idx, 1);
+      }
+      return steps;
+    }
+
+    function TimerRing({ seconds, total, color }) {
+      const r = 30, circ = 2 * Math.PI * r;
+      const progress = total > 0 ? seconds / total : 0;
+      return (
+        <svg width="76" height="76" style={{ transform: "rotate(-90deg)" }}>
+          <circle cx="38" cy="38" r={r} fill="none" stroke={C.fog} strokeWidth="4" />
+          <circle cx="38" cy="38" r={r} fill="none" stroke={color} strokeWidth="4"
+            strokeDasharray={circ} strokeDashoffset={circ * (1 - progress)}
+            strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s linear" }} />
+        </svg>
+      );
+    }
+
+    const css = `
+      @keyframes fadeUp  { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+      @keyframes glow    { 0%,100% { box-shadow:0 0 0 0 rgba(192,122,26,0); } 50% { box-shadow:0 0 0 10px rgba(192,122,26,.14); } }
+      @keyframes shimmer { 0%,100% { opacity:.65; } 50% { opacity:1; } }
+      @keyframes drift   { 0%,100% { transform:translate(0,0) scale(1); } 50% { transform:translate(24px,-20px) scale(1.06); } }
+
+      .root {
+        font-family:'Lora',Georgia,serif;
+        background:#fdf9f2; min-height:100vh;
+        color:#1c1610; position:relative; overflow:hidden;
+      }
+      .orb { position:fixed; border-radius:50%; pointer-events:none; animation:drift linear infinite; }
+      .screen {
+        position:relative; z-index:1; min-height:100vh;
+        display:flex; flex-direction:column;
+        align-items:center; justify-content:center;
+        padding:32px 20px; animation:fadeUp .5s ease both;
+      }
+      .badge {
+        display:inline-flex; align-items:center; gap:8px;
+        background:#ede6d4; border:1px solid #d4c8b4;
+        border-radius:40px; padding:6px 20px;
+        font-size:11px; letter-spacing:.22em; color:#9c8670;
+        text-transform:uppercase; margin-bottom:20px;
+        font-family:'Playfair Display',serif;
+      }
+      .headline {
+        font-family:'Playfair Display',serif;
+        font-size:clamp(28px,5.5vw,48px); font-weight:600;
+        line-height:1.2; color:#1c1610; text-align:center; margin-bottom:10px;
+      }
+      .subline {
+        font-size:17px; font-style:italic; color:#6b5840;
+        text-align:center; line-height:1.65; max-width:400px; margin:0 auto;
+      }
+      .rule {
+        width:64px; height:2px;
+        background:linear-gradient(90deg,transparent,#c07a1a,transparent);
+        margin:24px auto;
+      }
+      .sec-label {
+        font-family:'Playfair Display',serif;
+        font-size:11px; letter-spacing:.28em; color:#c07a1a;
+        text-transform:uppercase; text-align:center; margin-bottom:14px;
+      }
+      .focus-grid {
+        display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+        gap:10px; width:100%; max-width:520px; margin:0 auto 30px;
+      }
+      .focus-card {
+        border:1.5px solid #d4c8b4; border-radius:14px;
+        padding:18px 12px; text-align:center;
+        cursor:pointer; transition:all .22s ease; background:#fdf9f2;
+      }
+      .focus-card:hover { border-color:#c07a1a; transform:translateY(-2px); box-shadow:0 6px 20px rgba(192,122,26,.12); }
+      .focus-card.sel   { border-color:#c07a1a; box-shadow:0 0 0 3px rgba(192,122,26,.18),0 6px 20px rgba(192,122,26,.1); }
+      .focus-icon { font-size:22px; margin-bottom:8px; }
+      .focus-lbl  { font-family:'Playfair Display',serif; font-size:12px; font-weight:600; color:#3d3020; line-height:1.4; }
+      .dur-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:30px; }
+      .dur-btn {
+        border:1.5px solid #d4c8b4; border-radius:40px;
+        padding:10px 26px; cursor:pointer; background:transparent;
+        color:#6b5840; font-family:'Lora',serif; font-size:16px; transition:all .2s;
+      }
+      .dur-btn:hover { border-color:#c07a1a; color:#c07a1a; }
+      .dur-btn.sel   { border-color:#c07a1a; color:#fff; background:#c07a1a; }
+      .begin-btn {
+        padding:16px 52px; border-radius:50px; border:none; cursor:pointer;
+        background:#1c1610; color:#ffd27a;
+        font-family:'Playfair Display',serif; font-size:13px; letter-spacing:.22em;
+        text-transform:uppercase; transition:all .3s; animation:glow 3s ease-in-out infinite;
+      }
+      .begin-btn:hover:not(:disabled) {
+        background:#c07a1a; color:#1c1610;
+        box-shadow:0 8px 28px rgba(192,122,26,.35); transform:translateY(-1px);
+      }
+      .begin-btn:disabled { opacity:.35; cursor:not-allowed; animation:none; }
+
+      .session-wrap { width:100%; max-width:660px; margin:0 auto; }
+      .sess-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+      .sess-badge { font-family:'Playfair Display',serif; font-size:11px; letter-spacing:.2em; color:#9c8670; text-transform:uppercase; }
+      .sess-total { font-size:14px; color:#6b5840; font-style:italic; }
+      .prog-outer { height:3px; background:#d4c8b4; border-radius:3px; margin-bottom:22px; overflow:hidden; }
+      .prog-inner { height:100%; border-radius:3px; transition:width .5s ease; background:linear-gradient(90deg,#c07a1a,#2d9c8a); }
+      .card {
+        background:#fff; border:1px solid #d4c8b4; border-radius:20px;
+        padding:30px 28px;
+        box-shadow:0 4px 32px rgba(60,40,20,.07),0 1px 0 rgba(255,255,255,.9) inset;
+      }
+      .step-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+      .step-num { font-family:'Playfair Display',serif; font-size:11px; letter-spacing:.28em; color:#9c8670; }
+      .step-dur { font-size:14px; color:#6b5840; font-style:italic; }
+      .step-title-row { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+      .step-icon { width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; border:1.5px solid; }
+      .step-title { font-family:'Playfair Display',serif; font-size:clamp(18px,3.2vw,24px); font-weight:600; color:#1c1610; line-height:1.25; }
+      .step-body { font-size:16px; line-height:1.9; color:#3d3020; white-space:pre-wrap; max-height:280px; overflow-y:auto; padding-right:10px; margin-bottom:16px; }
+      .step-body::-webkit-scrollbar { width:3px; }
+      .step-body::-webkit-scrollbar-thumb { background:#d4c8b4; border-radius:3px; }
+      .tip-box { border-left:3px solid; border-radius:0 10px 10px 0; padding:12px 16px; margin-bottom:22px; font-size:14.5px; color:#3d3020; font-style:italic; line-height:1.7; }
+      .tip-lbl { font-family:'Playfair Display',serif; font-size:9.5px; letter-spacing:.28em; text-transform:uppercase; display:block; margin-bottom:4px; font-style:normal; font-weight:600; }
+      .timer-row { display:flex; align-items:center; gap:18px; margin-bottom:20px; }
+      .timer-time { font-family:'Playfair Display',serif; font-size:30px; font-weight:600; letter-spacing:.06em; line-height:1; }
+      .timer-sub  { font-size:13px; color:#9c8670; font-style:italic; margin-top:3px; }
+      .controls { display:flex; gap:10px; flex-wrap:wrap; }
+      .btn { flex:1; padding:13px 20px; border-radius:40px; font-family:'Playfair Display',serif; font-size:11px; letter-spacing:.2em; cursor:pointer; transition:all .2s; text-align:center; text-transform:uppercase; border:1.5px solid; }
+      .btn-dark    { background:#1c1610; border-color:#1c1610; color:#ffd27a; }
+      .btn-dark:hover { background:#3d3020; box-shadow:0 4px 16px rgba(0,0,0,.18); }
+      .btn-outline { background:transparent; border-color:#d4c8b4; color:#6b5840; }
+      .btn-outline:hover { border-color:#6b5840; color:#1c1610; }
+      .btn-outline:disabled { opacity:.3; cursor:not-allowed; }
+      .btn-amber   { background:#c07a1a; border-color:#c07a1a; color:#fff; }
+      .btn-amber:hover { background:#e8a23a; border-color:#e8a23a; box-shadow:0 4px 16px rgba(192,122,26,.28); }
+      .dots { display:flex; gap:6px; justify-content:center; margin-top:18px; flex-wrap:wrap; align-items:center; }
+      .dot  { border-radius:4px; transition:all .3s; height:6px; }
+      .end-link { display:block; text-align:center; margin-top:16px; background:none; border:none; color:#9c8670; font-family:'Lora',serif; font-size:13px; font-style:italic; cursor:pointer; transition:color .2s; }
+      .end-link:hover { color:#6b5840; }
+      .complete-icon { font-size:54px; animation:shimmer 2.5s ease-in-out infinite; margin-bottom:14px; }
+      .quote-box { background:#ede6d4; border:1px solid #d4c8b4; border-radius:16px; padding:22px 26px; margin:22px 0; text-align:left; max-width:480px; }
+      .quote-title { font-family:'Playfair Display',serif; font-size:14px; font-weight:600; color:#1c1610; letter-spacing:.08em; margin-bottom:10px; }
+      .quote-body  { font-size:15.5px; color:#3d3020; line-height:1.78; }
+      .quote-attr  { font-size:14px; color:#9c8670; font-style:italic; margin-top:12px; }
+    `;
+
+    function App() {
+      const [screen, setScreen]   = useState("welcome");
+      const [focusKey, setFocus]  = useState(null);
+      const [duration, setDur]    = useState(20);
+      const [routine, setRoutine] = useState([]);
+      const [stepIdx, setStep]    = useState(0);
+      const [running, setRunning] = useState(false);
+      const [elapsed, setElapsed] = useState(0);
+      const intervalRef = useRef(null);
+
+      const step      = routine[stepIdx];
+      const stepTotal = step ? step.minutes * 60 : 60;
+      const focusObj  = focuses.find(f => f.key === focusKey);
+
+      useEffect(() => {
+        if (running) {
+          intervalRef.current = setInterval(() => {
+            setElapsed(e => {
+              if (e + 1 >= stepTotal) { clearInterval(intervalRef.current); setRunning(false); return stepTotal; }
+              return e + 1;
+            });
+          }, 1000);
+        }
+        return () => clearInterval(intervalRef.current);
+      }, [running, stepTotal]);
+
+      function startSession() {
+        setRoutine(buildRoutine(focusKey, duration));
+        setStep(0); setElapsed(0); setRunning(false); setScreen("session");
+      }
+      function nextStep() {
+        clearInterval(intervalRef.current); setRunning(false);
+        if (stepIdx + 1 < routine.length) { setStep(stepIdx + 1); setElapsed(0); }
+        else setScreen("complete");
+      }
+      function prevStep() {
+        clearInterval(intervalRef.current); setRunning(false);
+        if (stepIdx > 0) { setStep(stepIdx - 1); setElapsed(0); }
+      }
+      function reset() {
+        clearInterval(intervalRef.current);
+        setScreen("welcome"); setFocus(null); setDur(20);
+        setRoutine([]); setStep(0); setElapsed(0); setRunning(false);
+      }
+
+      const fmt      = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+      const totalMin = routine.reduce((a,b) => a + b.minutes, 0);
+      const pct      = routine.length ? ((stepIdx + elapsed/stepTotal) / routine.length)*100 : 0;
+
+      return (
+        <div className="root">
+          <style>{css}</style>
+
+          <div className="orb" style={{width:380,height:380,top:"-100px",right:"-80px",background:"radial-gradient(circle,rgba(192,122,26,.07) 0%,transparent 70%)",animationDuration:"22s"}} />
+          <div className="orb" style={{width:300,height:300,bottom:"-80px",left:"-60px",background:"radial-gradient(circle,rgba(45,156,138,.06) 0%,transparent 70%)",animationDuration:"28s",animationDelay:"-11s"}} />
+
+          {/* WELCOME */}
+          {screen === "welcome" && (
+            <div className="screen">
+              <div style={{maxWidth:560,width:"100%",textAlign:"center"}}>
+                <div className="badge">✦ Monroe Institute · Gateway Program</div>
+                <h1 className="headline">Morning Consciousness<br/>Practice</h1>
+                <p className="subline">A guided session drawn from the Gateway Intermediate Workbook — expanded awareness, healing, and clarity.</p>
+                <div className="rule" />
+
+                <div className="sec-label">Choose your intention</div>
+                <div className="focus-grid">
+                  {focuses.map(f => (
+                    <div key={f.key}
+                      className={`focus-card${focusKey===f.key?" sel":""}`}
+                      style={focusKey===f.key ? {background:f.bg} : {}}
+                      onClick={() => setFocus(f.key)}>
+                      <div className="focus-icon" style={{color:f.color}}>{f.icon}</div>
+                      <div className="focus-lbl">{f.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="sec-label">Session duration</div>
+                <div className="dur-row">
+                  {durations.map(d => (
+                    <button key={d.value} className={`dur-btn${duration===d.value?" sel":""}`} onClick={() => setDur(d.value)}>
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button className="begin-btn" disabled={!focusKey} onClick={startSession}>Begin Session</button>
+              </div>
+            </div>
+          )}
+
+          {/* SESSION */}
+          {screen === "session" && step && (
+            <div className="screen">
+              <div className="session-wrap">
+                <div className="sess-header">
+                  <span className="sess-badge">Gateway Morning Practice</span>
+                  <span className="sess-total">~{totalMin} min · {focusObj?.label}</span>
+                </div>
+                <div className="prog-outer"><div className="prog-inner" style={{width:`${pct}%`}} /></div>
+
+                <div className="card">
+                  <div className="step-meta">
+                    <span className="step-num">STEP {stepIdx+1} OF {routine.length}</span>
+                    <span className="step-dur">{step.minutes} min suggested</span>
+                  </div>
+                  <div className="step-title-row">
+                    <div className="step-icon" style={{color:step.color,borderColor:`${step.color}60`,background:`${step.color}14`}}>{step.icon}</div>
+                    <h2 className="step-title">{step.title}</h2>
+                  </div>
+                  <div className="step-body">{step.instruction}</div>
+                  <div className="tip-box" style={{borderColor:`${step.color}80`,background:`${step.color}0d`}}>
+                    <span className="tip-lbl" style={{color:step.color}}>∿ Guidance</span>
+                    {step.tip}
+                  </div>
+                  <div className="timer-row">
+                    <div style={{position:"relative",flexShrink:0}}>
+                      <TimerRing seconds={elapsed} total={stepTotal} color={step.color} />
+                      <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                        <span style={{fontSize:13,color:step.color}}>{running?"●":elapsed>0?"‖":"▷"}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="timer-time" style={{color:step.color}}>{fmt(elapsed)}</div>
+                      <div className="timer-sub">of {fmt(stepTotal)}</div>
+                    </div>
+                  </div>
+                  <div className="controls">
+                    <button className="btn btn-outline" onClick={prevStep} disabled={stepIdx===0} style={{flex:"0 0 auto",minWidth:86}}>← Back</button>
+                    <button className="btn btn-dark" onClick={() => { if(running){clearInterval(intervalRef.current);setRunning(false);}else setRunning(true); }}>
+                      {running?"Pause":elapsed>0?"Resume":"Start Timer"}
+                    </button>
+                    <button className="btn btn-amber" onClick={nextStep} style={{flex:"0 0 auto",minWidth:86}}>
+                      {stepIdx+1===routine.length?"Complete →":"Next →"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="dots">
+                  {routine.map((_,i) => (
+                    <div key={i} className="dot" style={{
+                      background:i===stepIdx?step.color:i<stepIdx?C.dust:C.fog,
+                      width:i===stepIdx?22:7,
+                    }} />
+                  ))}
+                </div>
+                <button className="end-link" onClick={reset}>✕ End session</button>
+              </div>
+            </div>
+          )}
+
+          {/* COMPLETE */}
+          {screen === "complete" && (
+            <div className="screen">
+              <div style={{maxWidth:480,width:"100%",textAlign:"center"}}>
+                <div className="complete-icon" style={{color:C.amber}}>✦</div>
+                <div className="badge">Session Complete</div>
+                <h2 className="headline" style={{fontSize:"clamp(26px,4vw,38px)"}}>Well done</h2>
+                <p className="subline">You've completed your {totalMin}-minute <em>{focusObj?.label}</em> practice.</p>
+                <div className="rule" />
+                <div className="quote-box">
+                  <div className="quote-title">∿ Integration — write it down</div>
+                  <p className="quote-body">Before returning to daily activity, record any impressions, images, words, sensations, or insights that arose. The period just after returning is when experiences are most vivid — your workbook is your companion.</p>
+                  <p className="quote-attr">"The more you consciously perform and use these methods, the easier and more effective they become."</p>
+                </div>
+                <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+                  <button className="btn btn-outline" style={{flex:"0 0 auto",minWidth:160}} onClick={() => {setStep(0);setElapsed(0);setRunning(false);setScreen("session");}}>Repeat Session</button>
+                  <button className="btn btn-amber"   style={{flex:"0 0 auto",minWidth:160}} onClick={reset}>New Session</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
